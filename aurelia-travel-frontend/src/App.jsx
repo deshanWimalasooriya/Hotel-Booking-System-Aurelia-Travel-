@@ -1,6 +1,8 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import Layout from './components/layout/Layout'
+import { useUser } from './context/userContext'
+
 
 //import Pages
 import Home from './pages/Home'
@@ -12,6 +14,8 @@ import Profile from './pages/Profile'
 import './index.css'
 
 function App() {
+
+  const { user, isAdmin } = useUser()
   return (
     <AuthProvider>
       <Layout>
@@ -19,8 +23,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<SearchResults />} />
           <Route path="/hotel/:id" element={<HotelDetails />} />
-          <Route path="/auth" element={<LoginRegister />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/profile" element={user ? <Profile /> : <Navigate to="/auth" />} />
+          <Route path="/auth" element={!user ? <LoginRegister /> : <Navigate to="/profile" />} />
         </Routes>
       </Layout>
     </AuthProvider>

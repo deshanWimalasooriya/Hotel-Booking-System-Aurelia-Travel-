@@ -1,12 +1,14 @@
-import { useState, useRef, useEffect } from 'react' // Added hooks
-import { Link, useLocation } from 'react-router-dom'
-import { Search, Heart, User, LogOut, Settings } from 'lucide-react' // Added LogOut & Settings
-import { useAuth } from '../../context/AuthContext'
+import { useState, useRef, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom' // Added useNavigate
+import { Search, Heart, User, LogOut, Settings } from 'lucide-react'
+import { useUser } from '../../context/UserContext'
+import axios from 'axios' // Added axios
 import './styles/header.css'
 
 const Header = () => {
   const location = useLocation()
-  const { user, logout } = useAuth()
+  const navigate = useNavigate() // Initialize navigate
+  const { user, clearUser } = useUser() // removed 'logout', using 'clearUser' based on reference
   
   // State for Dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -22,6 +24,38 @@ const Header = () => {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // --- NEW LOGOUT FUNCTION (From Reference) ---
+  const handleLogout = async () => {
+    // Close the dropdown immediately for better UX
+    setDropdownOpen(false);
+
+    try {
+      // 1. Call Backend API to invalidate session
+      await axios.post('http://localhost:5000/api/auth/logout', {}, {
+        withCredentials: true
+      });
+
+      // 2. Clear Client-Side Storage
+      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
+      // Clear cookie manually if needed
+      document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+
+      // 3. Clear Context State
+      clearUser();
+
+      // 4. Navigate to Auth Page
+      navigate('/auth');
+
+    } catch (err) {
+      console.error('Logout error:', err);
+      // Even if API fails, we still force clear local state and redirect
+      clearUser();
+      navigate('/auth');
+    }
+  };
+  // ---------------------------------------------
 
   return (
     <header className="header">
@@ -42,7 +76,6 @@ const Header = () => {
             <Search className="header-icon" />
           </button>
           
-          {/* --- UPDATED SECTION START --- */}
           {user ? (
             <div className="header-profile-container" ref={dropdownRef}>
               {/* Profile Icon Button */}
@@ -67,7 +100,6 @@ const Header = () => {
               {dropdownOpen && (
                 <div className="header-dropdown">
                   <div className="dropdown-user-details">
-                    {/* Fallback to 'User' if name is missing */}
                     <span className="dropdown-username">{user.name || user.username || 'User'}</span>
                     <span className="dropdown-email">{user.email}</span>
                   </div>
@@ -83,11 +115,9 @@ const Header = () => {
                     Profile
                   </Link>
                   
+                  {/* Updated Logout Button */}
                   <button 
-                    onClick={() => {
-                      setDropdownOpen(false);
-                      logout();
-                    }} 
+                    onClick={handleLogout} 
                     className="dropdown-item dropdown-logout"
                   >
                     <LogOut size={16} />
@@ -99,7 +129,6 @@ const Header = () => {
           ) : (
             <Link to="/auth" className="btn btn-primary">Login</Link>
           )}
-          {/* --- UPDATED SECTION END --- */}
           
         </div>
       </div>

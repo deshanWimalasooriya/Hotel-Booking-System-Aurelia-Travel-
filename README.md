@@ -6,3 +6,5 @@ This is a hotel booking system
 >create config.json
 >npx sequelize-cli db:migrate
 >npx sequelize-cli db:seed:all
+
+hi

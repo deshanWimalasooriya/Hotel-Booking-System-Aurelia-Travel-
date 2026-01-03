@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom' // Added useNavigate
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Search, Heart, User, LogOut, Settings } from 'lucide-react'
 import { useUser } from '../../context/UserContext'
-import axios from 'axios' // Added axios
+import axios from 'axios'
 import './styles/header.css'
 
 const Header = () => {
   const location = useLocation()
-  const navigate = useNavigate() // Initialize navigate
-  const { user, clearUser } = useUser() // removed 'logout', using 'clearUser' based on reference
+  const navigate = useNavigate()
+  const { user, clearUser } = useUser()
   
   // State for Dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false)
@@ -25,37 +25,39 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // --- NEW LOGOUT FUNCTION (From Reference) ---
-  const handleLogout = async () => {
-    // Close the dropdown immediately for better UX
-    setDropdownOpen(false);
+  // Helper function for Greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good Morning!';
+    if (hour < 18) return 'Good Afternoon!';
+    return 'Good Evening!';
+  }
 
+  // Helper to get First Name
+  const getFirstName = () => {
+    if (!user) return '';
+    const name = user.username || user.name || 'Traveler';
+    return name.split(' ')[0]; 
+  }
+
+  // Logout Function
+  const handleLogout = async () => {
+    setDropdownOpen(false);
     try {
-      // 1. Call Backend API to invalidate session
       await axios.post('http://localhost:5000/api/auth/logout', {}, {
         withCredentials: true
       });
-
-      // 2. Clear Client-Side Storage
       localStorage.removeItem('token');
       sessionStorage.removeItem('token');
-      // Clear cookie manually if needed
       document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-
-      // 3. Clear Context State
       clearUser();
-
-      // 4. Navigate to Auth Page
       navigate('/auth');
-
     } catch (err) {
       console.error('Logout error:', err);
-      // Even if API fails, we still force clear local state and redirect
       clearUser();
       navigate('/auth');
     }
   };
-  // ---------------------------------------------
 
   return (
     <header className="header">
@@ -77,55 +79,61 @@ const Header = () => {
           </button>
           
           {user ? (
-            <div className="header-profile-container" ref={dropdownRef}>
-              {/* Profile Icon Button */}
-              <button 
-                className="header-profile-btn" 
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-              >
-                {user.profile_image ? (
-                  <img 
-                    src={user.profile_image} 
-                    alt="Profile" 
-                    className="header-profile-img" 
-                  />
-                ) : (
-                  <div className="header-profile-placeholder">
-                    <User className="header-profile-icon-default" />
+            <>
+              {/* --- UPDATED: Greeting Stacked --- */}
+              <div className="header-greeting-wrapper">
+                <span className="greeting-time">{getGreeting()}</span>
+                <span className="greeting-name">{getFirstName()}</span>
+              </div>
+              {/* --------------------------------- */}
+
+              <div className="header-profile-container" ref={dropdownRef}>
+                <button 
+                  className="header-profile-btn" 
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  {user.profile_image ? (
+                    <img 
+                      src={user.profile_image} 
+                      alt="Profile" 
+                      className="header-profile-img" 
+                    />
+                  ) : (
+                    <div className="header-profile-placeholder">
+                      <User className="header-profile-icon-default" />
+                    </div>
+                  )}
+                </button>
+
+                {dropdownOpen && (
+                  <div className="header-dropdown">
+                    <div className="dropdown-user-details">
+                      <span className="dropdown-username">{user.name || user.username || 'User'}</span>
+                      <span className="dropdown-email">{user.email}</span>
+                    </div>
+                    
+                    <div className="dropdown-divider"></div>
+                    
+                    <Link 
+                      to="/profile" 
+                      className="dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                    >
+                      <Settings size={16} />
+                      Profile
+                    </Link>
+                    
+                    <button 
+                      onClick={handleLogout} 
+                      className="dropdown-item dropdown-logout"
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </button>
                   </div>
                 )}
-              </button>
-
-              {/* Dropdown Menu */}
-              {dropdownOpen && (
-                <div className="header-dropdown">
-                  <div className="dropdown-user-details">
-                    <span className="dropdown-username">{user.name || user.username || 'User'}</span>
-                    <span className="dropdown-email">{user.email}</span>
-                  </div>
-                  
-                  <div className="dropdown-divider"></div>
-                  
-                  <Link 
-                    to="/profile" 
-                    className="dropdown-item"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <Settings size={16} />
-                    Profile
-                  </Link>
-                  
-                  {/* Updated Logout Button */}
-                  <button 
-                    onClick={handleLogout} 
-                    className="dropdown-item dropdown-logout"
-                  >
-                    <LogOut size={16} />
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+              </div>
+            </>
           ) : (
             <Link to="/auth" className="btn btn-primary">Login</Link>
           )}

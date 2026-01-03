@@ -230,3 +230,35 @@
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Wrapper for the stacked text */
+.header-greeting-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end; /* Aligns text to the right side */
+  margin-right: 12px;
+  line-height: 1.2; /* Tighter line spacing */
+}
+
+/* "Good Morning" Style */
+.greeting-time {
+  font-size: 0.75rem; /* Smaller text */
+  color: #64748b; /* Grey color */
+  font-weight: 500;
+}
+
+/* User Name Style */
+.greeting-name {
+  font-size: 0.95rem; /* Larger text */
+  font-weight: 700;   /* Bold */
+  color: #085ce3;     /* Dark color */
+  text-transform: capitalize;
+}
+
+/* Hide on mobile to save space */
+@media (max-width: 768px) {
+  .header-greeting-wrapper {
+    display: none;
+  }
+}

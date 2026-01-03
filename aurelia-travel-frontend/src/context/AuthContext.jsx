@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom' // ✅ Import useNavigate
 
 export const AuthContext = createContext()
 
+const API_URL = 'http://localhost:5000/api/auth';
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -12,7 +14,7 @@ export const AuthProvider = ({ children }) => {
   // 1. CHECK SESSION
   const checkAuth = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/auth/me', {
+      const res = await axios.get(`${API_URL}/me`, {
         withCredentials: true 
       });
 
@@ -33,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   // 2. LOGIN FUNCTION (Auto-Redirects to Profile)
   const login = async (credentials) => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', credentials, {
+      const res = await axios.post(`${API_URL}/login`, credentials, {
         withCredentials: true 
       });
 
@@ -47,6 +49,12 @@ export const AuthProvider = ({ children }) => {
             return { success: true };
         }
       }
+
+      // ✅ FIX: Handle case where API returns 200 but success is false
+      return { 
+        success: false, 
+        message: res.data.message || 'Login failed' 
+      };
     } catch (err) {
       console.error("Login Error:", err);
       return { 
@@ -59,7 +67,7 @@ export const AuthProvider = ({ children }) => {
   // 3. LOGOUT FUNCTION (Auto-Redirects to Auth)
   const logout = async () => {
     try {
-      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+      await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
     } catch (err) {
       console.error(err);
     } finally {

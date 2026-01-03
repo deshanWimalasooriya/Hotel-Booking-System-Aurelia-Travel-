@@ -12,5 +12,9 @@ router.get('/', verifyToken, checkRole('admin'), userController.getAllUsers);
 // Get Specific User
 router.get('/:id', verifyToken, userController.getUserById);
 
+router.post('/', userController.createUser);
+router.put('/:id', verifyToken, userController.updateUser);
+router.delete('/:id', verifyToken, checkRole('admin'), userController.deleteUser);
+
 
 module.exports = router;

@@ -20,7 +20,13 @@ import './index.css'
 
 function App() {
 
-  const { user, isAdmin } = useUser()
+  // Added 'loading' to prevent redirecting before user data is fetched
+  const { user, isAdmin, loading } = useUser()
+
+  if (loading) {
+    return <div className="loading-screen">Loading...</div>; // Optional: Or return null
+  }
+
   return (
     <AuthProvider>
       <Layout>

@@ -1143,7 +1143,7 @@ export default function Profile() {
                                         
                                         <div className="settings-row" style={{ padding: '24px', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' }}>
                                             <div className="settings-info">
-                                                <strong style={{ fontSize: '1.05rem', color: '#475569', display: 'block', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <strong style={{ fontSize: '1.05rem', color: '#475569', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                                                     Account Security 
                                                     <span style={{ fontSize: '0.65rem', backgroundColor: '#cbd5e1', color: '#0f172a', padding: '2px 6px', borderRadius: '4px', fontWeight: '800', letterSpacing: '0.5px' }}>REQUIRED</span>
                                                 </strong>
